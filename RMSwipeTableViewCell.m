@@ -68,7 +68,19 @@
     // We only want to deal with the gesture of it's a pan gesture
     if ([panGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && self.revealDirection != RMSwipeTableViewCellRevealDirectionNone) {
         CGPoint translation = [panGestureRecognizer translationInView:[self superview]];
-        return (fabs(translation.x) / fabs(translation.y) > 1) ? YES : NO;
+		CGFloat xOverYTranslation = fabs(translation.x) / fabs(translation.y);
+		// Even infinity (y == 0) gives us > 1
+		BOOL shouldBegin = (xOverYTranslation > 1);
+		
+		if (shouldBegin)
+		{
+			if (self.revealDirection == RMSwipeTableViewCellRevealDirectionLeft && translation.x < 0)
+				shouldBegin = NO;
+			else if (self.revealDirection == RMSwipeTableViewCellRevealDirectionRight && translation.x > 1)
+				shouldBegin = NO;
+		}
+			
+        return shouldBegin;
     } else {
         return NO;
     }
