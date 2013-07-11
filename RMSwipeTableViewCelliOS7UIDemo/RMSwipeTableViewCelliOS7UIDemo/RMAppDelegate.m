@@ -49,7 +49,7 @@
     
     [[UINavigationBar appearance] setShadowImage:[[UIImage alloc] init]];
     
-    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    [[UINavigationBar appearance] setBarTintColor:[UIColor whiteColor]];
     [[UINavigationBar appearance] setTitleTextAttributes:[[NSDictionary alloc] initWithObjectsAndKeys:
                                                           [UIFont fontWithName:@"HelveticaNeue-Medium" size:0], UITextAttributeFont,
                                                           [UIColor colorWithWhite:0.0f alpha:0.0f], UITextAttributeTextShadowColor,

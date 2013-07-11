@@ -35,7 +35,7 @@
 - (void)initialize
 {
     // We need to set the contentView's background colour, otherwise the sides are clear on the swipe and animations
-    [self.contentView setBackgroundColor:[UIColor whiteColor]];
+    [self.customContentView setBackgroundColor:[UIColor whiteColor]];
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     [panGestureRecognizer setDelegate:self];
     [self addGestureRecognizer:panGestureRecognizer];
@@ -113,12 +113,12 @@
 
 -(void)animateContentViewForPoint:(CGPoint)point velocity:(CGPoint)velocity {
     if ((point.x > 0 && self.revealDirection == RMSwipeTableViewCellRevealDirectionLeft) || (point.x < 0 && self.revealDirection == RMSwipeTableViewCellRevealDirectionRight) || self.revealDirection == RMSwipeTableViewCellRevealDirectionBoth) {
-        self.contentView.frame = CGRectOffset(self.contentView.bounds, point.x, 0);
+        self.customContentView.frame = CGRectOffset(self.customContentView.bounds, point.x, 0);
         if ([self.delegate respondsToSelector:@selector(swipeTableViewCell:didSwipeToPoint:velocity:)]) {
             [self.delegate swipeTableViewCell:self didSwipeToPoint:point velocity:velocity];
         }
     } else if ((point.x > 0 && self.revealDirection == RMSwipeTableViewCellRevealDirectionRight) || (point.x < 0 && self.revealDirection == RMSwipeTableViewCellRevealDirectionLeft)) {
-        self.contentView.frame = CGRectOffset(self.contentView.bounds, 0, 0);
+        self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
     }
 }
 
@@ -137,21 +137,21 @@
                               delay:0
                             options:UIViewAnimationOptionCurveEaseIn
                          animations:^{
-                             self.contentView.frame = CGRectOffset(self.contentView.bounds, 0 - (point.x * 0.03), 0);
+                             self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0 - (point.x * 0.03), 0);
                          }
                          completion:^(BOOL finished) {
                              [UIView animateWithDuration:0.1
                                                    delay:0
                                                  options:UIViewAnimationOptionCurveEaseInOut
                                               animations:^{
-                                                  self.contentView.frame = CGRectOffset(self.contentView.bounds, 0 + (point.x * 0.02), 0);
+                                                  self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0 + (point.x * 0.02), 0);
                                               }
                                               completion:^(BOOL finished) {
                                                   [UIView animateWithDuration:0.1
                                                                         delay:0
                                                                       options:UIViewAnimationOptionCurveEaseOut
                                                                    animations:^{
-                                                                       self.contentView.frame = self.contentView.bounds;
+                                                                       self.customContentView.frame = self.customContentView.bounds;
                                                                    }
                                                                    completion:^(BOOL finished) {
                                                                        [self cleanupBackView];
@@ -169,7 +169,7 @@
                               delay:0
                             options:self.animationType
                          animations:^{
-                             self.contentView.frame = CGRectOffset(self.contentView.bounds, 0, 0);
+                             self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
                          }
                          completion:^(BOOL finished) {
                              [self cleanupBackView];
@@ -183,7 +183,7 @@
 
 -(UIView*)backView {
     if (!_backView) {
-        _backView = [[UIView alloc] initWithFrame:self.contentView.bounds];
+        _backView = [[UIView alloc] initWithFrame:self.customContentView.bounds];
         _backView.backgroundColor = self.backViewbackgroundColor;
     }
     return _backView;

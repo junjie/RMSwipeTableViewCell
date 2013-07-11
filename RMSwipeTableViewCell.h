@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ABTableViewCell.h"
 
 typedef NS_ENUM(NSUInteger, RMSwipeTableViewCellRevealDirection) {
     RMSwipeTableViewCellRevealDirectionNone = -1, // disables panning
@@ -25,7 +26,7 @@ typedef NS_ENUM(NSUInteger, RMSwipeTableViewCellAnimationType) {
 
 @protocol RMSwipeTableViewCellDelegate;
 
-@interface RMSwipeTableViewCell : UITableViewCell <UIGestureRecognizerDelegate>
+@interface RMSwipeTableViewCell : ABTableViewCell <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UIView *backView;
 @property (nonatomic, readwrite) RMSwipeTableViewCellRevealDirection revealDirection; // default is RMSwipeTableViewCellRevealDirectionBoth
