@@ -35,7 +35,6 @@
 - (void)initialize
 {
     // We need to set the contentView's background colour, otherwise the sides are clear on the swipe and animations
-    [self.customContentView setBackgroundColor:[UIColor whiteColor]];
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     [panGestureRecognizer setDelegate:self];
     [self addGestureRecognizer:panGestureRecognizer];
