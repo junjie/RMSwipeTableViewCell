@@ -7,9 +7,12 @@
 //
 
 #import "RMSwipeTableViewCell.h"
+#import "D2DropBounceBehavior.h"
 
-@interface RMSwipeTableViewCell ()
-
+@interface RMSwipeTableViewCell () <UIDynamicAnimatorDelegate, UICollisionBehaviorDelegate>
+@property (nonatomic, strong) UIDynamicAnimator* animator;
+@property (nonatomic) CGPoint resetPoint;
+@property (nonatomic) CGPoint resetVelocity;
 @end
 
 @implementation RMSwipeTableViewCell
@@ -54,6 +57,7 @@
 
 -(void)prepareForReuse {
     [super prepareForReuse];
+	[self clearAllAnimationBehaviorResetContentViewFrame:YES]; 
     self.shouldAnimateCellReset = YES;
 }
 
@@ -116,6 +120,9 @@
     if ([self.delegate respondsToSelector:@selector(swipeTableViewCellDidStartSwiping:)]) {
         [self.delegate swipeTableViewCellDidStartSwiping:self];
     }
+	
+	[self clearAllAnimationBehaviorResetContentViewFrame:NO];
+
     [self.backgroundView addSubview:self.backView];
     [self.backView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
 }
@@ -133,7 +140,11 @@
     }
 }
 
--(void)resetCellFromPoint:(CGPoint)point velocity:(CGPoint)velocity {
+-(void)resetCellFromPoint:(CGPoint)point velocity:(CGPoint)velocity
+{
+	self.resetPoint = point;
+	self.resetVelocity = velocity;
+	
     if ([self.delegate respondsToSelector:@selector(swipeTableViewCellWillResetState:fromPoint:animation:velocity:)]) {
         [self.delegate swipeTableViewCellWillResetState:self fromPoint:point animation:self.animationType velocity:velocity];
     }
@@ -143,42 +154,15 @@
     if ((self.revealDirection == RMSwipeTableViewCellRevealDirectionLeft && point.x < 0) || (self.revealDirection == RMSwipeTableViewCellRevealDirectionRight && point.x > 0)) {
         return;
     }
-    if (self.animationType == RMSwipeTableViewCellAnimationTypeBounce) {
+    if (self.animationType == RMSwipeTableViewCellAnimationTypeBounce)
+	{
+		[self bounceBackContentView:self.customContentView];
+    }
+	else
+	{
         [UIView animateWithDuration:self.animationDuration
                               delay:0
-                            options:UIViewAnimationOptionCurveEaseIn
-                         animations:^{
-                             self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0 - (point.x * 0.03), 0);
-                         }
-                         completion:^(BOOL finished) {
-                             [UIView animateWithDuration:0.1
-                                                   delay:0
-                                                 options:UIViewAnimationOptionCurveEaseInOut
-                                              animations:^{
-                                                  self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0 + (point.x * 0.02), 0);
-                                              }
-                                              completion:^(BOOL finished) {
-                                                  [UIView animateWithDuration:0.1
-                                                                        delay:0
-                                                                      options:UIViewAnimationOptionCurveEaseOut
-                                                                   animations:^{
-                                                                       self.customContentView.frame = self.customContentView.bounds;
-                                                                   }
-                                                                   completion:^(BOOL finished) {
-                                                                       [self cleanupBackView];
-                                                                       if ([self.delegate respondsToSelector:@selector(swipeTableViewCellDidResetState:fromPoint:animation:velocity:)]) {
-                                                                           [self.delegate swipeTableViewCellDidResetState:self fromPoint:point animation:self.animationType velocity:velocity];
-                                                                       }
-                                                                   }
-                                                   ];
-                                              }
-                              ];
-                         }
-         ];
-    } else {
-        [UIView animateWithDuration:self.animationDuration
-                              delay:0
-                            options:self.animationType
+                            options:(UIViewAnimationOptions) self.animationType
                          animations:^{
                              self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
                          }
@@ -203,6 +187,85 @@
 -(void)cleanupBackView {
     [_backView removeFromSuperview];
     _backView = nil;
+}
+
+#pragma mark - Dynamics
+
+- (UIDynamicAnimator *)animator
+{
+	if (!_animator)
+	{
+		_animator = [[UIDynamicAnimator alloc] initWithReferenceView:self];
+		[_animator setDelegate:self];
+	}
+	
+	return _animator;
+}
+
+- (void)clearAllAnimationBehaviorResetContentViewFrame:(BOOL)resetFrame
+{
+	if (self.animator.behaviors.count)
+	{
+		[self.animator removeAllBehaviors];
+		
+		if (resetFrame)
+			self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
+	}
+}
+
+- (void)bounceBackContentView:(UIView*)view
+{
+	BOOL contentViewIsDraggedLeft = (view.frame.origin.x < 0);
+
+	CGFloat gravityX = 2.0;
+	UIEdgeInsets collisionInsets;
+	
+	if (contentViewIsDraggedLeft)
+	{
+		// Top/left/bottom/right
+		// To bounce back towards the right, inset by 1 so we can go back to x=0
+		// -320 allowance on left because content view already dragged leftwards
+		collisionInsets = UIEdgeInsetsMake(0, -320, 0, 1);
+	}
+	
+	else
+	{
+		gravityX = gravityX * -1;
+		// Top/left/bottom/right
+		// To bounce back towards the left, inset by 1 so we can go back to x=0
+		collisionInsets = UIEdgeInsetsMake(0, 1, 0, -320);
+	}
+
+	D2DropBounceBehavior *slideBounceBehavior = [[D2DropBounceBehavior alloc] initWithItems:@[view]];
+	[slideBounceBehavior.gravityBehavior setXComponent:gravityX yComponent:0];
+	[slideBounceBehavior.collisionBehavior setTranslatesReferenceBoundsIntoBoundaryWithInsets:collisionInsets];
+	[slideBounceBehavior.collisionBehavior setCollisionDelegate:self];
+	[slideBounceBehavior.dynamicItemBehavior setElasticity:1.0];
+//	[slideBounceBehavior setAction:^{
+//		NSLog(@"View: %@", NSStringFromCGRect(view.frame));
+//	}];
+
+	[self.animator addBehavior:slideBounceBehavior];
+}
+
+- (void)dynamicAnimatorDidPause:(UIDynamicAnimator*)animator
+{
+	if (self.animator.behaviors.count)
+	{
+		[self clearAllAnimationBehaviorResetContentViewFrame:NO];
+		
+		[self cleanupBackView];
+		if ([self.delegate respondsToSelector:@selector(swipeTableViewCellDidResetState:fromPoint:animation:velocity:)]) {
+			[self.delegate swipeTableViewCellDidResetState:self fromPoint:self.resetPoint animation:self.animationType velocity:self.resetVelocity];
+		}
+
+		NSLog(@"All behaviors removed for item because dynamicAnimatorDidPause");
+	}
+}
+
+- (void)collisionBehavior:(UICollisionBehavior *)behavior endedContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier
+{
+	NSLog(@"Finished collision");
 }
 
 @end
