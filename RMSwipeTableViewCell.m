@@ -259,13 +259,13 @@
 			[self.delegate swipeTableViewCellDidResetState:self fromPoint:self.resetPoint animation:self.animationType velocity:self.resetVelocity];
 		}
 
-		NSLog(@"All behaviors removed for item because dynamicAnimatorDidPause");
+//		DDLogInfo(@"All behaviors removed for item because dynamicAnimatorDidPause");
 	}
 }
 
 - (void)collisionBehavior:(UICollisionBehavior *)behavior endedContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier
 {
-	NSLog(@"Finished collision");
+//	DDLogInfo(@"Finished collision");
 }
 
 @end
