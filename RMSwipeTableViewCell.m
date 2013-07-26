@@ -57,7 +57,9 @@
 
 -(void)prepareForReuse {
     [super prepareForReuse];
-	[self clearAllAnimationBehaviorResetContentViewFrame:YES]; 
+	[self clearAllAnimationBehaviorResetContentViewFrame:YES];
+	if (_backView)
+		self.backView.backgroundColor = self.backViewbackgroundColor;
     self.shouldAnimateCellReset = YES;
 }
 
@@ -178,7 +180,7 @@
 
 -(UIView*)backView {
     if (!_backView) {
-        _backView = [[UIView alloc] initWithFrame:self.customContentView.bounds];
+        _backView = [[UIView alloc] initWithFrame:self.backgroundView.bounds];
         _backView.backgroundColor = self.backViewbackgroundColor;
     }
     return _backView;
@@ -207,9 +209,12 @@
 	if (self.animator.behaviors.count)
 	{
 		[self.animator removeAllBehaviors];
-		
-		if (resetFrame)
-			self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
+	}
+	
+	if (resetFrame)
+	{
+		self.customContentView.frame = CGRectOffset(self.customContentView.bounds, 0, 0);
+		self.customContentView.hidden = NO;
 	}
 }
 
@@ -225,7 +230,7 @@
 		// Top/left/bottom/right
 		// To bounce back towards the right, inset by 1 so we can go back to x=0
 		// -320 allowance on left because content view already dragged leftwards
-		collisionInsets = UIEdgeInsetsMake(0, -320, 0, 1);
+		collisionInsets = UIEdgeInsetsMake(0, -view.bounds.size.width, 0, 1);
 	}
 	
 	else
@@ -233,7 +238,7 @@
 		gravityX = gravityX * -1;
 		// Top/left/bottom/right
 		// To bounce back towards the left, inset by 1 so we can go back to x=0
-		collisionInsets = UIEdgeInsetsMake(0, 1, 0, -320);
+		collisionInsets = UIEdgeInsetsMake(0, 1, 0, -view.bounds.size.width);
 	}
 
 	D2DropBounceBehavior *slideBounceBehavior = [[D2DropBounceBehavior alloc] initWithItems:@[view]];
@@ -241,9 +246,14 @@
 	[slideBounceBehavior.collisionBehavior setTranslatesReferenceBoundsIntoBoundaryWithInsets:collisionInsets];
 	[slideBounceBehavior.collisionBehavior setCollisionDelegate:self];
 	[slideBounceBehavior.dynamicItemBehavior setElasticity:1.0];
-//	[slideBounceBehavior setAction:^{
-//		NSLog(@"View: %@", NSStringFromCGRect(view.frame));
-//	}];
+	
+	if ([self.delegate respondsToSelector:@selector(swipeTableViewCell:isResettingStateAtPoint:)])
+	{
+		[slideBounceBehavior setAction:^{
+			[self.delegate swipeTableViewCell:self
+					  isResettingStateAtPoint:view.frame.origin];
+		}];
+	}
 
 	[self.animator addBehavior:slideBounceBehavior];
 }
