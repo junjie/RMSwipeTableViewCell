@@ -19,8 +19,6 @@
 		UIGravityBehavior *gravityBehavior =
 		[[UIGravityBehavior alloc] initWithItems:items];
 		
-		[gravityBehavior setXComponent:0 yComponent:1.0];
-		
 		_gravityBehavior = gravityBehavior;
 		
 		UICollisionBehavior *collisionBehavior =

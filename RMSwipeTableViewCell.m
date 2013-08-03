@@ -242,7 +242,7 @@
 	}
 
 	D2DropBounceBehavior *slideBounceBehavior = [[D2DropBounceBehavior alloc] initWithItems:@[view]];
-	[slideBounceBehavior.gravityBehavior setXComponent:gravityX yComponent:0];
+	[slideBounceBehavior.gravityBehavior setGravityDirection:CGSizeMake(gravityX, 0)];
 	[slideBounceBehavior.collisionBehavior setTranslatesReferenceBoundsIntoBoundaryWithInsets:collisionInsets];
 	[slideBounceBehavior.collisionBehavior setCollisionDelegate:self];
 	[slideBounceBehavior.dynamicItemBehavior setElasticity:1.0];
