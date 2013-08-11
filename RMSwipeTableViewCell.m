@@ -228,9 +228,9 @@
 	if (contentViewIsDraggedLeft)
 	{
 		// Top/left/bottom/right
-		// To bounce back towards the right, inset by 1 so we can go back to x=0
+		// To bounce back towards the right, to collide and stop at x=0
 		// -320 allowance on left because content view already dragged leftwards
-		collisionInsets = UIEdgeInsetsMake(0, -view.bounds.size.width, 0, 1);
+		collisionInsets = UIEdgeInsetsMake(0, -view.bounds.size.width, 0, 0);
 	}
 	
 	else
