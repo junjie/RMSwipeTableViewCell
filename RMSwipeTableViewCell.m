@@ -9,11 +9,13 @@
 #import "RMSwipeTableViewCell.h"
 #import "D2DropBounceBehavior.h"
 
+#define BACK_VIEW_ACCESSORY_VIEW_WIDTH 30
+#define BACK_VIEW_ACCESSORY_VIEW_HEIGHT 30
+
 @interface RMSwipeTableViewCell () <UIDynamicAnimatorDelegate, UICollisionBehaviorDelegate>
 @property (nonatomic, strong) UIDynamicAnimator* animator;
 @property (nonatomic) CGPoint resetPoint;
 @property (nonatomic) CGPoint resetVelocity;
-@property (nonatomic, readonly) UIView *actualContentView;
 @end
 
 @implementation RMSwipeTableViewCell
@@ -61,8 +63,18 @@
 -(void)prepareForReuse {
     [super prepareForReuse];
 	[self clearAllAnimationBehaviorResetContentViewFrame:YES];
+	
 	if (_backView)
+	{
 		self.backView.backgroundColor = self.backViewbackgroundColor;
+	}
+	
+	if (_backViewAccessoryView)
+	{
+		[_backViewAccessoryView removeFromSuperview];
+		_backViewAccessoryView = nil;
+	}
+	
     self.shouldAnimateCellReset = YES;
 }
 
@@ -181,6 +193,23 @@
     }
 }
 
+- (UIImageView *)backViewAccessoryView
+{
+	if (!_backViewAccessoryView)
+	{
+		CGRect backViewFrame =
+		CGRectMake(self.backView.frame.size.width - BACK_VIEW_ACCESSORY_VIEW_WIDTH - 10,
+				   (self.backView.frame.size.height - BACK_VIEW_ACCESSORY_VIEW_HEIGHT) / 2,
+				   BACK_VIEW_ACCESSORY_VIEW_WIDTH,
+				   BACK_VIEW_ACCESSORY_VIEW_HEIGHT);
+		
+		_backViewAccessoryView = [[UIImageView alloc] initWithFrame:CGRectIntegral(backViewFrame)];
+		[self.backView addSubview:_backViewAccessoryView];
+	}
+	
+	return _backViewAccessoryView;
+}
+
 -(UIView*)backView {
     if (!_backView) {
         _backView = [[UIView alloc] initWithFrame:self.backgroundView.bounds];
@@ -192,6 +221,12 @@
 -(void)cleanupBackView {
     [_backView removeFromSuperview];
     _backView = nil;
+	
+	if (_backViewAccessoryView)
+	{
+		[_backViewAccessoryView removeFromSuperview];
+		_backViewAccessoryView = nil;
+	}
 }
 
 - (void)rm_completeBounceAnimationFromPoint:(CGPoint)point velocity:(CGPoint)velocity

@@ -21,6 +21,13 @@
 @property (nonatomic, strong) UIView *backView;
 
 /**
+ 
+ An accessory image view that is added on top of the back view
+ 
+ */
+@property (nonatomic, strong) UIImageView *backViewAccessoryView;
+
+/**
  Determines the direction that swiping is enabled for. 
  
  Default is RMSwipeCellRevealDirectionBoth
@@ -82,6 +89,14 @@
  Default is [UIColor colorWithWhite:0.92 alpha:1]
  */
 @property (nonatomic, strong) UIColor *backViewbackgroundColor;
+
+/**
+ The actual content view that we should be shifting. Override to shift
+ another content view instead
+ 
+ Default: self.customContentView
+ */
+@property (nonatomic, readonly) UIView *actualContentView;
 
 @property (nonatomic, assign) id <RMSwipeCellDelegate> delegate;
 

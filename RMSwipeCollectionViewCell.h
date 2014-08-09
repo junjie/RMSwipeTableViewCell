@@ -20,6 +20,13 @@
 @property (nonatomic, strong) UIView *backView;
 
 /**
+ 
+ An accessory image view that is added on top of the back view
+ 
+ */
+@property (nonatomic, strong) UIImageView *backViewAccessoryView;
+
+/**
  Determines the direction that swiping is enabled for.
  
  Default is RMSwipeCellRevealDirectionBoth
