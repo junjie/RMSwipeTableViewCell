@@ -23,6 +23,7 @@
         
         static NSString *CellIdentifier = @"Cell";
         [self.tableView registerClass:[RMPersonTableViewCell class] forCellReuseIdentifier:CellIdentifier];
+        [self.tableView setSeparatorInset:UIEdgeInsetsMake(0, 0, 0, 0)];
         [self.tableView setRowHeight:64];
         
         UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(resetTableView)];
@@ -99,10 +100,10 @@
     static NSString *CellIdentifier = @"Cell";
     RMPersonTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
-    cell.textLabel.text = [[self.array objectAtIndex:indexPath.row] objectForKey:@"name"];
-    cell.detailTextLabel.text = [[self.array objectAtIndex:indexPath.row] objectForKey:@"title"];
-    [cell setThumbnail:[UIImage imageNamed:[[self.array objectAtIndex:indexPath.row] objectForKey:@"image"]]];
-    [cell setFavourite:[[[self.array objectAtIndex:indexPath.row] objectForKey:@"isFavourite"] boolValue] animated:NO];
+    cell.textLabel.text = (self.array)[indexPath.row][@"name"];
+    cell.detailTextLabel.text = (self.array)[indexPath.row][@"title"];
+    [cell setThumbnail:[UIImage imageNamed:(self.array)[indexPath.row][@"image"]]];
+    [cell setFavourite:[(self.array)[indexPath.row][@"isFavourite"] boolValue] animated:NO];
     cell.delegate = self;
     
     return cell;
@@ -134,12 +135,12 @@
 #endif
     if (point.x >= CGRectGetHeight(swipeTableViewCell.frame)) {
         NSIndexPath *indexPath = [self.tableView indexPathForCell:swipeTableViewCell];
-        if ([[[self.array objectAtIndex:indexPath.row] objectForKey:@"isFavourite"] boolValue]) {
-            [[self.array objectAtIndex:indexPath.row] setObject:@NO forKey:@"isFavourite"];
+        if ([(self.array)[indexPath.row][@"isFavourite"] boolValue]) {
+            (self.array)[indexPath.row][@"isFavourite"] = @NO;
         } else {
-            [[self.array objectAtIndex:indexPath.row] setObject:@YES forKey:@"isFavourite"];
+            (self.array)[indexPath.row][@"isFavourite"] = @YES;
         }
-        [(RMPersonTableViewCell*)swipeTableViewCell setFavourite:[[[self.array objectAtIndex:indexPath.row] objectForKey:@"isFavourite"] boolValue] animated:YES];
+        [(RMPersonTableViewCell*)swipeTableViewCell setFavourite:[(self.array)[indexPath.row][@"isFavourite"] boolValue] animated:YES];
     } else if (point.x < 0 && -point.x >= CGRectGetHeight(swipeTableViewCell.frame)) {
         swipeTableViewCell.shouldAnimateCellReset = NO;
         [[(RMPersonTableViewCell*)swipeTableViewCell checkmarkGreyImageView] removeFromSuperview];
@@ -154,7 +155,7 @@
                              NSIndexPath *indexPath = [self.tableView indexPathForCell:swipeTableViewCell];
                              [self.array removeObjectAtIndex:indexPath.row];
                              [self.tableView beginUpdates];
-                             [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                             [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationMiddle];
                              [self.tableView endUpdates];
                          }
          ];

@@ -45,10 +45,12 @@
     self.revealDirection = RMSwipeTableViewCellRevealDirectionBoth;
     self.animationType = RMSwipeTableViewCellAnimationTypeBounce;
     self.animationDuration = 0.2f;
+	self.bounceWithDynamics = YES;
     self.shouldAnimateCellReset = YES;
     self.backViewbackgroundColor = [UIColor colorWithWhite:0.92 alpha:1];
     self.panElasticity = YES;
-    self.panElasticityStartingPoint = 0;
+    self.panElasticityFactor = 0.55f;
+    self.panElasticityStartingPoint = 0.0f;
     
     UIView *backgroundView = [[UIView alloc] initWithFrame:self.frame];
     backgroundView.backgroundColor = [UIColor whiteColor];
@@ -100,7 +102,7 @@
         if (ABS(translation.x) > self.panElasticityStartingPoint) {
             CGFloat width = CGRectGetWidth(self.frame);
             CGFloat offset = abs(translation.x);
-            panOffset = (offset * 0.55f * width) / (offset * 0.55f + width);
+            panOffset = (offset * self.panElasticityFactor * width) / (offset * self.panElasticityFactor + width);
             panOffset *= translation.x < 0 ? -1.0f : 1.0f;
             if (self.panElasticityStartingPoint > 0) {
                 panOffset = translation.x > 0 ? panOffset + self.panElasticityStartingPoint / 2 : panOffset - self.panElasticityStartingPoint / 2;
@@ -113,7 +115,7 @@
         [self animateContentViewForPoint:actualTranslation velocity:velocity];
     } else if (panGestureRecognizer.state == UIGestureRecognizerStateChanged && [panGestureRecognizer numberOfTouches] > 0) {
         [self animateContentViewForPoint:actualTranslation velocity:velocity];
-	} else if (panGestureRecognizer.state == UIGestureRecognizerStateEnded) {
+	} else {
 		[self resetCellFromPoint:actualTranslation  velocity:velocity];
 	}
 }
@@ -158,7 +160,7 @@
     }
     if (self.animationType == RMSwipeTableViewCellAnimationTypeBounce)
 	{
-		[self bounceBackContentView:self.customContentView];
+		[self bounceBackContentView:self.customContentView fromPoint:point velocity:velocity];
     }
 	else
 	{
@@ -191,6 +193,93 @@
     _backView = nil;
 }
 
+- (void)rm_completeBounceAnimationFromPoint:(CGPoint)point velocity:(CGPoint)velocity
+{
+	BOOL shouldCleanupBackView = YES;
+	if ([self.delegate respondsToSelector:@selector(swipeTableViewCellShouldCleanupBackView:)]) {
+		shouldCleanupBackView = [self.delegate swipeTableViewCellShouldCleanupBackView:self];
+	}
+	if (shouldCleanupBackView) {
+		[self cleanupBackView];
+	}
+	
+	if ([self.delegate respondsToSelector:@selector(swipeTableViewCellDidResetState:fromPoint:animation:velocity:)]) {
+		[self.delegate swipeTableViewCellDidResetState:self fromPoint:point animation:self.animationType velocity:velocity];
+	}
+}
+
+#pragma mark - Bouncing
+
+- (void)bounceBackContentView:(UIView*)view fromPoint:(CGPoint)point velocity:(CGPoint)velocity
+{
+	if (self.bounceWithDynamics)
+	{
+		[self rm_bounceWithDynamicsBackContentView:view];
+	}
+	else
+	{
+		[self rm_bounceWithSpringAnimationBackContentView:view fromPoint:point velocity:velocity];
+	}
+}
+
+- (void)rm_bounceWithDynamicsBackContentView:(UIView*)view
+{
+	BOOL contentViewIsDraggedLeft = (view.frame.origin.x < 0);
+	
+	CGFloat gravityX = 2.0;
+	UIEdgeInsets collisionInsets;
+	
+	if (contentViewIsDraggedLeft)
+	{
+		// Top/left/bottom/right
+		// To bounce back towards the right, to collide and stop at x=0
+		// -320 allowance on left because content view already dragged leftwards
+		collisionInsets = UIEdgeInsetsMake(0, -view.bounds.size.width, 0, 0);
+	}
+	
+	else
+	{
+		gravityX = gravityX * -1;
+		// Top/left/bottom/right
+		// To bounce back towards the left, inset by 1 so we can go back to x=0
+		collisionInsets = UIEdgeInsetsMake(0, 1, 0, -view.bounds.size.width);
+	}
+	
+	D2DropBounceBehavior *slideBounceBehavior = [[D2DropBounceBehavior alloc] initWithItems:@[view]];
+	[slideBounceBehavior.gravityBehavior setGravityDirection:CGVectorMake(gravityX, 0)];
+	[slideBounceBehavior.collisionBehavior setTranslatesReferenceBoundsIntoBoundaryWithInsets:collisionInsets];
+	[slideBounceBehavior.collisionBehavior setCollisionDelegate:self];
+	[slideBounceBehavior.dynamicItemBehavior setElasticity:1.0];
+	
+	if ([self.delegate respondsToSelector:@selector(swipeTableViewCell:isResettingStateAtPoint:)])
+	{
+		[slideBounceBehavior setAction:^{
+			[self.delegate swipeTableViewCell:self
+					  isResettingStateAtPoint:view.frame.origin];
+		}];
+	}
+	
+	[self.animator addBehavior:slideBounceBehavior];
+}
+
+- (void)rm_bounceWithSpringAnimationBackContentView:(UIView *)view fromPoint:(CGPoint)point velocity:(CGPoint)velocity
+{
+	__typeof(self) __weak weakSelf = self;
+	void (^completionBlock)(BOOL) = ^(BOOL finished) {
+		[weakSelf rm_completeBounceAnimationFromPoint:point velocity:point];
+	};
+	
+	[UIView animateWithDuration:self.animationDuration
+						  delay:0
+		 usingSpringWithDamping:0.6
+		  initialSpringVelocity:point.x / 5
+						options:UIViewAnimationOptionAllowUserInteraction
+					 animations:^{
+						 view.frame = view.bounds;
+					 }
+					 completion:completionBlock];
+}
+
 #pragma mark - Dynamics
 
 - (UIDynamicAnimator *)animator
@@ -218,64 +307,19 @@
 	}
 }
 
-- (void)bounceBackContentView:(UIView*)view
-{
-	BOOL contentViewIsDraggedLeft = (view.frame.origin.x < 0);
-
-	CGFloat gravityX = 2.0;
-	UIEdgeInsets collisionInsets;
-	
-	if (contentViewIsDraggedLeft)
-	{
-		// Top/left/bottom/right
-		// To bounce back towards the right, to collide and stop at x=0
-		// -320 allowance on left because content view already dragged leftwards
-		collisionInsets = UIEdgeInsetsMake(0, -view.bounds.size.width, 0, 0);
-	}
-	
-	else
-	{
-		gravityX = gravityX * -1;
-		// Top/left/bottom/right
-		// To bounce back towards the left, inset by 1 so we can go back to x=0
-		collisionInsets = UIEdgeInsetsMake(0, 1, 0, -view.bounds.size.width);
-	}
-
-	D2DropBounceBehavior *slideBounceBehavior = [[D2DropBounceBehavior alloc] initWithItems:@[view]];
-	[slideBounceBehavior.gravityBehavior setGravityDirection:CGVectorMake(gravityX, 0)];
-	[slideBounceBehavior.collisionBehavior setTranslatesReferenceBoundsIntoBoundaryWithInsets:collisionInsets];
-	[slideBounceBehavior.collisionBehavior setCollisionDelegate:self];
-	[slideBounceBehavior.dynamicItemBehavior setElasticity:1.0];
-	
-	if ([self.delegate respondsToSelector:@selector(swipeTableViewCell:isResettingStateAtPoint:)])
-	{
-		[slideBounceBehavior setAction:^{
-			[self.delegate swipeTableViewCell:self
-					  isResettingStateAtPoint:view.frame.origin];
-		}];
-	}
-
-	[self.animator addBehavior:slideBounceBehavior];
-}
-
 - (void)dynamicAnimatorDidPause:(UIDynamicAnimator*)animator
 {
 	if (self.animator.behaviors.count)
 	{
 		[self clearAllAnimationBehaviorResetContentViewFrame:NO];
-		
-		[self cleanupBackView];
-		if ([self.delegate respondsToSelector:@selector(swipeTableViewCellDidResetState:fromPoint:animation:velocity:)]) {
-			[self.delegate swipeTableViewCellDidResetState:self fromPoint:self.resetPoint animation:self.animationType velocity:self.resetVelocity];
-		}
-
-//		DDLogInfo(@"All behaviors removed for item because dynamicAnimatorDidPause");
+		[self rm_completeBounceAnimationFromPoint:self.resetPoint velocity:self.resetVelocity];
 	}
 }
 
 - (void)collisionBehavior:(UICollisionBehavior *)behavior endedContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier
 {
-//	DDLogInfo(@"Finished collision");
+	// Finished collision
+	
 }
 
 @end
