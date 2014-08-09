@@ -1,16 +1,15 @@
 //
-//  RMSwipeTableViewCell.h
-//  RMSwipeTableView
+//  RMSwipeCollectionViewCell.h
+//  Due2
 //
-//  Created by Rune Madsen on 2012-11-24.
-//  Copyright (c) 2012 The App Boutique. All rights reserved.
+//  Created by Lin Junjie on 9/8/14.
+//  Copyright (c) 2014 Lin Junjie. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 #import "RMSwipeCellDefines.h"
-#import "ABTableViewCell.h"
 
-@interface RMSwipeTableViewCell : ABTableViewCell <UIGestureRecognizerDelegate>
+@interface RMSwipeCollectionViewCell : UICollectionViewCell <UIGestureRecognizerDelegate>
 
 /**
  
@@ -21,21 +20,21 @@
 @property (nonatomic, strong) UIView *backView;
 
 /**
- Determines the direction that swiping is enabled for. 
+ Determines the direction that swiping is enabled for.
  
  Default is RMSwipeCellRevealDirectionBoth
  */
 @property (nonatomic, readwrite) RMSwipeCellRevealDirection revealDirection;
 
 /**
- Determines the animation that occurs when panning ends. 
+ Determines the animation that occurs when panning ends.
  
  Default is RMSwipeCellAnimationTypeBounce.
  */
 @property (nonatomic, readwrite) RMSwipeCellAnimationType animationType;
 
 /**
- Determines the animation duration when the cell's contentView animates back. 
+ Determines the animation duration when the cell's contentView animates back.
  
  Default is 0.2f
  */
@@ -58,7 +57,7 @@
 @property (nonatomic, readwrite) BOOL shouldAnimateCellReset;
 
 /**
- When panning/swiping the cell's location is set to exponentially decay. The elasticity (also know as rubber banding) matches that of a UIScrollView/UITableView. 
+ When panning/swiping the cell's location is set to exponentially decay. The elasticity (also know as rubber banding) matches that of a UIScrollView/UITableView.
  
  Default is YES
  */
@@ -82,6 +81,14 @@
  Default is [UIColor colorWithWhite:0.92 alpha:1]
  */
 @property (nonatomic, strong) UIColor *backViewbackgroundColor;
+
+/**
+ The actual content view that we should be shifting. Override to shift
+ another content view instead
+ 
+ Default: self.contentView
+ */
+@property (nonatomic, readonly) UIView *actualContentView;
 
 @property (nonatomic, assign) id <RMSwipeCellDelegate> delegate;
 

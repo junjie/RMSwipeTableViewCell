@@ -1,39 +1,40 @@
 //
-//  RMSwipeTableViewCell.m
-//  RMSwipeTableView
+//  RMSwipeCollectionViewCell.m
+//  Due2
 //
-//  Created by Rune Madsen on 2012-11-24.
-//  Copyright (c) 2012 The App Boutique. All rights reserved.
+//  Created by Lin Junjie on 9/8/14.
+//  Copyright (c) 2014 Lin Junjie. All rights reserved.
 //
 
-#import "RMSwipeTableViewCell.h"
+#import "RMSwipeCollectionViewCell.h"
 #import "D2DropBounceBehavior.h"
 
-@interface RMSwipeTableViewCell () <UIDynamicAnimatorDelegate, UICollisionBehaviorDelegate>
+@interface RMSwipeCollectionViewCell () <UIDynamicAnimatorDelegate, UICollisionBehaviorDelegate>
 @property (nonatomic, strong) UIDynamicAnimator* animator;
 @property (nonatomic) CGPoint resetPoint;
 @property (nonatomic) CGPoint resetVelocity;
-@property (nonatomic, readonly) UIView *actualContentView;
 @end
 
-@implementation RMSwipeTableViewCell
+@implementation RMSwipeCollectionViewCell
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
-        [self initialize];
+    self = [super initWithFrame:frame];
+    if (self)
+	{
+		[self initialize];
     }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
-    self = [super initWithCoder:aDecoder];
-    if (self) {
-        [self initialize];
-    }
-    return self;
+	self = [super initWithCoder:aDecoder];
+	if (self)
+	{
+		[self initialize];		
+	}
+	return self;
 }
 
 - (void)initialize
@@ -68,7 +69,7 @@
 
 - (UIView *)actualContentView
 {
-	return self.customContentView;
+	return self.contentView;
 }
 
 #pragma mark - Gesture recognizer delegate
@@ -88,7 +89,7 @@
 			else if (self.revealDirection == RMSwipeCellRevealDirectionRight && translation.x > 1)
 				shouldBegin = NO;
 		}
-			
+		
         return shouldBegin;
     } else {
         return NO;
@@ -127,7 +128,7 @@
     }
 	
 	[self clearAllAnimationBehaviorResetContentViewFrame:NO];
-
+	
     [self.backgroundView addSubview:self.backView];
     [self.backView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
 }
@@ -256,7 +257,7 @@
 	{
 		[slideBounceBehavior setAction:^{
 			[self.delegate swipeCell:self
-					  isResettingStateAtPoint:view.frame.origin];
+			 isResettingStateAtPoint:view.frame.origin];
 		}];
 	}
 	
