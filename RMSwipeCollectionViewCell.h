@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "RMSwipeCellDefines.h"
 
-@interface RMSwipeCollectionViewCell : UICollectionViewCell <UIGestureRecognizerDelegate>
+@interface RMSwipeCollectionViewCell : UICollectionViewCell <RMSwipeCell, UIGestureRecognizerDelegate>
 
 /**
  

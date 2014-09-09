@@ -21,14 +21,58 @@ typedef NS_ENUM(NSUInteger, RMSwipeCellAnimationType) {
     RMSwipeCellAnimationTypeBounce               = 4 << 16, // default
 };
 
+@protocol RMSwipeCellDelegate;
+
+@protocol RMSwipeCell <NSObject>
+
+- (UIView *)backView;
+- (void)setBackView:(UIView *)backView;
+
+- (UIImageView *)backViewAccessoryView;
+- (void)setBackViewAccessoryView:(UIImageView *)backViewAccessoryView;
+
+- (RMSwipeCellRevealDirection)revealDirection;
+- (void)setRevealDirection:(RMSwipeCellRevealDirection)revealDirection;
+
+- (RMSwipeCellAnimationType)animationType;
+- (void)setAnimationType:(RMSwipeCellAnimationType)animationType;
+
+- (CGFloat)animationDuration;
+- (void)setAnimationDuration:(CGFloat)animationDuration;
+
+- (BOOL)bounceWithDynamics;
+- (void)setBounceWithDynamics:(BOOL)bounceWithDynamics;
+
+- (BOOL)shouldAnimateCellReset;
+- (void)setShouldAnimateCellReset:(BOOL)shouldAnimateCellReset;
+
+- (BOOL)panElasticity;
+- (void)setPanElasticity:(BOOL)panElasticity;
+
+- (CGFloat)panElasticityFactor;
+- (void)setPanElasticityFactor:(CGFloat)panElasticityFactor;
+
+- (CGFloat)panElasticityStartingPoint;
+- (void)setPanElasticityStartingPoint:(CGFloat)panElasticityStartingPoint;
+
+- (UIColor *)backViewbackgroundColor;
+- (void)setBackViewbackgroundColor:(UIColor *)backViewbackgroundColor;
+
+- (UIView *)actualContentView;
+
+- (id <RMSwipeCellDelegate>)delegate;
+- (void)setDelegate:(id <RMSwipeCellDelegate>)delegate;
+
+@end
+
 @protocol RMSwipeCellDelegate <NSObject>
 
 @optional
--(void)swipeCellDidStartSwiping:(UIView *)swipeCell;
--(void)swipeCell:(UIView *)swipeCell didSwipeToPoint:(CGPoint)point velocity:(CGPoint)velocity;
--(void)swipeCell:(UIView *)swipeCell isResettingStateAtPoint:(CGPoint)point;
--(void)swipeCellWillResetState:(UIView *)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
--(void)swipeCellDidResetState:(UIView *)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
+-(void)swipeCellDidStartSwiping:(id <RMSwipeCell>)swipeCell;
+-(void)swipeCell:(id <RMSwipeCell>)swipeCell didSwipeToPoint:(CGPoint)point velocity:(CGPoint)velocity;
+-(void)swipeCell:(id <RMSwipeCell>)swipeCell isResettingStateAtPoint:(CGPoint)point;
+-(void)swipeCellWillResetState:(id <RMSwipeCell>)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
+-(void)swipeCellDidResetState:(id <RMSwipeCell>)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
 
 /**
  Defaults to YES (the backView is recreated everytime the state is about to reset)

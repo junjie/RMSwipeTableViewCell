@@ -10,7 +10,7 @@
 #import "RMSwipeCellDefines.h"
 #import "ABTableViewCell.h"
 
-@interface RMSwipeTableViewCell : ABTableViewCell <UIGestureRecognizerDelegate>
+@interface RMSwipeTableViewCell : ABTableViewCell <RMSwipeCell, UIGestureRecognizerDelegate>
 
 /**
  
