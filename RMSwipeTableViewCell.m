@@ -47,8 +47,8 @@
     
     self.revealDirection = RMSwipeCellRevealDirectionBoth;
     self.animationType = RMSwipeCellAnimationTypeBounce;
-    self.animationDuration = 0.2f;
-	self.bounceWithDynamics = YES;
+    self.animationDuration = 0.3f;
+	self.bounceWithDynamics = NO;
     self.shouldAnimateCellReset = YES;
     self.backViewbackgroundColor = [UIColor colorWithWhite:0.92 alpha:1];
     self.panElasticity = YES;
