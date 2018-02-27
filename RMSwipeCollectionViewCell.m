@@ -16,6 +16,7 @@
 @property (nonatomic, strong) UIDynamicAnimator* animator;
 @property (nonatomic) CGPoint resetPoint;
 @property (nonatomic) CGPoint resetVelocity;
+@property (nonatomic) CGPoint lastTranslation;
 @end
 
 @implementation RMSwipeCollectionViewCell
@@ -151,12 +152,14 @@
 -(void)animateContentViewForPoint:(CGPoint)point velocity:(CGPoint)velocity {
     if ((point.x > 0 && self.revealDirection == RMSwipeCellRevealDirectionLeft) || (point.x < 0 && self.revealDirection == RMSwipeCellRevealDirectionRight) || self.revealDirection == RMSwipeCellRevealDirectionBoth) {
         self.actualContentView.frame = CGRectOffset(self.actualContentView.bounds, point.x, 0);
-        if ([self.delegate respondsToSelector:@selector(swipeCell:didSwipeToPoint:velocity:)]) {
-            [self.delegate swipeCell:self didSwipeToPoint:point velocity:velocity];
+        if ([self.delegate respondsToSelector:@selector(swipeCell:didSwipeToPoint:fromPoint:velocity:)]) {
+            [self.delegate swipeCell:self didSwipeToPoint:point fromPoint:self.lastTranslation velocity:velocity];
         }
     } else if ((point.x > 0 && self.revealDirection == RMSwipeCellRevealDirectionRight) || (point.x < 0 && self.revealDirection == RMSwipeCellRevealDirectionLeft)) {
         self.actualContentView.frame = CGRectOffset(self.actualContentView.bounds, 0, 0);
     }
+	
+	self.lastTranslation = point;
 }
 
 -(void)resetCellFromPoint:(CGPoint)point velocity:(CGPoint)velocity
@@ -193,6 +196,8 @@
                          }
          ];
     }
+	
+	self.lastTranslation = CGPointZero;
 }
 
 - (UIImageView *)backViewAccessoryView

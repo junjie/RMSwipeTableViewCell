@@ -69,7 +69,7 @@ typedef NS_ENUM(NSUInteger, RMSwipeCellAnimationType) {
 
 @optional
 -(void)swipeCellDidStartSwiping:(id <RMSwipeCell>)swipeCell;
--(void)swipeCell:(id <RMSwipeCell>)swipeCell didSwipeToPoint:(CGPoint)point velocity:(CGPoint)velocity;
+-(void)swipeCell:(id <RMSwipeCell>)swipeCell didSwipeToPoint:(CGPoint)point fromPoint:(CGPoint)fromPoint velocity:(CGPoint)velocity;
 -(void)swipeCell:(id <RMSwipeCell>)swipeCell isResettingStateAtPoint:(CGPoint)point;
 -(void)swipeCellWillResetState:(id <RMSwipeCell>)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
 -(void)swipeCellDidResetState:(id <RMSwipeCell>)swipeCell fromPoint:(CGPoint)point animation:(RMSwipeCellAnimationType)animation velocity:(CGPoint)velocity;
