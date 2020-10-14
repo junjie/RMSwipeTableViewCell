@@ -70,7 +70,7 @@
 	if (self)
 	{
 		_customContentView = [[ABTableViewCellView alloc] initWithFrame:CGRectZero cell:self];
-		[self addSubview:_customContentView];
+		[self.contentView addSubview:_customContentView];
     }
     return self;
 }
