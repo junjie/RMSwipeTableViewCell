@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "RMSwipeCellDefines.h"
+#import "RMPanGestureRecognizer.h"
 
 @interface RMSwipeCollectionViewCell : UICollectionViewCell <RMSwipeCell, UIGestureRecognizerDelegate>
 
@@ -102,7 +103,6 @@
 // exposed class methods for easy subclassing
 -(void)handlePanGesture:(UIPanGestureRecognizer *)panGestureRecognizer;
 -(void)didStartSwiping;
--(BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panGestureRecognizer;
 -(void)animateContentViewForPoint:(CGPoint)point velocity:(CGPoint)velocity;
 -(void)resetCellFromPoint:(CGPoint)point velocity:(CGPoint)velocity;
 -(UIView *)backView;

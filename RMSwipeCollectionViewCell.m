@@ -44,8 +44,10 @@
 - (void)initialize
 {
     // We need to set the contentView's background colour, otherwise the sides are clear on the swipe and animations
-    UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
-    [panGestureRecognizer setDelegate:self];
+    __typeof(self) __weak weakSelf = self;
+    RMPanGestureRecognizer *panGestureRecognizer = [RMPanGestureRecognizer cellPanningRecognizerWithTarget:self action:@selector(handlePanGesture:) revealDirectionProvider:^RMSwipeCellRevealDirection(RMPanGestureRecognizer * _Nonnull gestureRecognizer) {
+        return weakSelf.revealDirection;
+    }];
     [self addGestureRecognizer:panGestureRecognizer];
     
     self.revealDirection = RMSwipeCellRevealDirectionBoth;
@@ -87,28 +89,6 @@
 }
 
 #pragma mark - Gesture recognizer delegate
-
--(BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panGestureRecognizer {
-    // We only want to deal with the gesture of it's a pan gesture
-    if ([panGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && self.revealDirection != RMSwipeCellRevealDirectionNone) {
-        CGPoint translation = [panGestureRecognizer translationInView:[self superview]];
-		CGFloat xOverYTranslation = fabs(translation.x) / fabs(translation.y);
-		// Even infinity (y == 0) gives us > 1
-		BOOL shouldBegin = (xOverYTranslation > 1);
-		
-		if (shouldBegin)
-		{
-			if (self.revealDirection == RMSwipeCellRevealDirectionLeft && translation.x < 0)
-				shouldBegin = NO;
-			else if (self.revealDirection == RMSwipeCellRevealDirectionRight && translation.x > 1)
-				shouldBegin = NO;
-		}
-		
-        return shouldBegin;
-    } else {
-        return NO;
-    }
-}
 
 -(void)handlePanGesture:(UIPanGestureRecognizer *)panGestureRecognizer {
     CGPoint translation = [panGestureRecognizer translationInView:panGestureRecognizer.view];
